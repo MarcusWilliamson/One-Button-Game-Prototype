@@ -22,32 +22,11 @@ options = {
 };
 
 
-
-let horizontalVelocity = 0;
-let verticalLevel = 0;
-let pin;
-let player;
-
 function update() {
+  // Init
   if (!ticks) {
     
   }
 
-  player = {
-    pos: vec(G.WIDTH * 0.5, G.HEIGHT * 0.5),
-    angle: horizontalVelocity / 90,
-  };
-  player.pos = vec(G.WIDTH * 0.5 + horizontalVelocity, (G.HEIGHT - 60) + verticalLevel);
-  char("a", player.pos);
-  
 
-  if (input.isPressed) {
-    player.angle += player.angle == 90 ? 1 : 0;;
-    horizontalVelocity += 1
-  } else {
-    player.angle -=  player.angle == -90 ? 1: 0;
-    horizontalVelocity -= 1
-  }
-  
-  verticalLevel -= 0.1
 }
