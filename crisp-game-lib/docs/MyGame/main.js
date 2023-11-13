@@ -1,31 +1,27 @@
-title = "Crazy Truck";
+title = "Worm";
 
 description = `
-  [Hold] <-
-  [Release] ->
+  Press to move
+  forward
 `;
 
 characters = [
-`
-LrrL
-LrrL
- rr
- rr 
-LrrL
-LrrL
-`
+
 ];
 
+const G = {
+	WIDTH: 100,
+	HEIGHT: 100
+}
+
 options = {
+  viewSize: {x: G.WIDTH, y: G.HEIGHT},
   isPlayingBgm: true,
   isReplayEnabled: true,
   seed: 16,
 };
 
-const G = {
-	WIDTH: 100,
-	HEIGHT: 150
-}
+
 
 let horizontalVelocity = 0;
 let verticalLevel = 0;
