@@ -22,6 +22,7 @@ const G = {
   PLAYER_GROW_SPEED: 1,
   PLAYER_SHRINK_SPEED: 1,
   PLAYER_DEFAULT_SIZE: 10,
+  PLAYER_HEIGHT: 3,
   SCREEN_SCROLL_SPEED: 0.1,
   SCREEN_SCROLL_BOUND: 90,
   SCREEN_EDGE_SCROLL_AMOUNT: 40,
@@ -89,8 +90,11 @@ function update() {
   
   // Draw player and spikes
   color("black");
-  box(player.pos, player.size, 3);
+  box(player.pos, player.size, G.PLAYER_HEIGHT);
   spikes.forEach(spike => char('a', spike.pos));
+
+  // Check collision
+  checkCollision();
 
   // Move player
   if(input.isPressed) { // Extend front
@@ -129,4 +133,11 @@ function update() {
 function scrollScreen(amount=G.SCREEN_SCROLL_SPEED) {
   player.pos.x -= amount;
   spikes.forEach(spike => spike.pos.x -= amount);
+}
+
+function checkCollision() {
+  const isCollidingWithSpike = box(player.pos, player.size, G.PLAYER_HEIGHT).isColliding.char.a;
+  if(isCollidingWithSpike) {
+    end();
+  }
 }
