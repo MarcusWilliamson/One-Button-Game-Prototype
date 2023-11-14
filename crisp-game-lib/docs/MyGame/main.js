@@ -72,17 +72,17 @@ function update() {
     }
 
     spikes.push({
-      pos: vec(20, 50),
+      pos: vec(20, G.CEILING_LEVEL),
       speed: 0.5,
       goingUp: false
     });
     spikes.push({
-      pos: vec(60, 50),
+      pos: vec(60, G.CEILING_LEVEL),
       speed: 0.5,
       goingUp: false
     });
     spikes.push({
-      pos: vec(100, 50),
+      pos: vec(100, G.CEILING_LEVEL),
       speed: 0.5,
       goingUp: false
     });
@@ -91,7 +91,10 @@ function update() {
   // Draw player and spikes
   color("black");
   box(player.pos, player.size, G.PLAYER_HEIGHT);
-  spikes.forEach(spike => char('a', spike.pos));
+  spikes.forEach(spike => {
+    char('a', spike.pos);
+    box(spike.pos.x, (spike.pos.y + G.CEILING_LEVEL) / 2, 4, (spike.pos.y - G.CEILING_LEVEL));
+  });
 
   // Check collision
   checkCollision();
