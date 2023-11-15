@@ -21,13 +21,14 @@ const G = {
 	HEIGHT: 100,
   PLAYER_GROW_SPEED: 1,
   PLAYER_SHRINK_SPEED: 1,
-  PLAYER_DEFAULT_SIZE: 10,
+  PLAYER_DEFAULT_SIZE: 12,
   PLAYER_HEIGHT: 3,
   SCREEN_SCROLL_SPEED: 0.1,
   SCREEN_SCROLL_BOUND: 90,
   SCREEN_EDGE_SCROLL_AMOUNT: 40,
   GROUND_LEVEL: 90,
-  CEILING_LEVEL: 40,
+  CEILING_LEVEL: 20,
+  SPIKE_STARTING_LEVEL: 60,
   SPIKE_DEFAULT_SPEED: 0.5
 }
 
@@ -54,14 +55,17 @@ let player;
 * @typedef {{
   * pos: Vector,
   * speed: number,
-  * goingUp: boolean
+  * goingUp: boolean,
+  * startLevel: number
   * }} Spike
   */
   
   /**
   * @type  { Spike [] }
   */
- let spikes = [];
+let spikes = [];
+
+let currentStreak = 0;
 
 function update() {
   // Init
@@ -71,21 +75,19 @@ function update() {
       size: G.PLAYER_DEFAULT_SIZE
     }
 
-    spikes.push({
-      pos: vec(20, G.CEILING_LEVEL),
-      speed: 0.5,
-      goingUp: false
-    });
-    spikes.push({
-      pos: vec(60, G.CEILING_LEVEL),
-      speed: 0.5,
-      goingUp: false
-    });
-    spikes.push({
-      pos: vec(100, G.CEILING_LEVEL),
-      speed: 0.5,
-      goingUp: false
-    });
+    createSpike(40, undefined, -10);
+    createSpike(60, undefined, -10);
+    createSpike(50, undefined, -10);
+    createSpike(90, G.GROUND_LEVEL, -10);
+    createSpike(70, G.GROUND_LEVEL, -10);
+    createSpike(80, G.GROUND_LEVEL, -10);
+
+    createSpike(120, G.SPIKE_STARTING_LEVEL + 25);
+    createSpike(125, G.SPIKE_STARTING_LEVEL + 20);
+    createSpike(130, G.SPIKE_STARTING_LEVEL + 15);
+    createSpike(135, G.SPIKE_STARTING_LEVEL + 10);
+    createSpike(140, G.SPIKE_STARTING_LEVEL + 5);
+    createSpike(145);
   }
   
   // Draw player and spikes
@@ -103,7 +105,12 @@ function update() {
   if(input.isPressed) { // Extend front
     player.size += G.PLAYER_GROW_SPEED;
     player.pos.x += G.PLAYER_GROW_SPEED / 2;
+    currentStreak += player.size * (G.PLAYER_GROW_SPEED / 2) * 0.2; // Size * distance traveled * 0.2
   } else if (player.size > G.PLAYER_DEFAULT_SIZE) { // Retract rear
+    if (currentStreak > 0) {
+      addScore(currentStreak);
+      currentStreak = 0;
+    }
     player.size -= G.PLAYER_SHRINK_SPEED;
     player.size = clamp(player.size, G.PLAYER_DEFAULT_SIZE, 100);
     player.pos.x += G.PLAYER_GROW_SPEED / 2;
@@ -123,7 +130,7 @@ function update() {
         spike.pos.y += spike.speed;
       }
     } else { // Going up
-      if(spike.pos.y <= G.CEILING_LEVEL) {
+      if(spike.pos.y <= spike.startLevel) {
         spike.goingUp = false;
       } else {
         spike.pos.y -= spike.speed;
@@ -143,4 +150,13 @@ function checkCollision() {
   if(isCollidingWithSpike) {
     end();
   }
+}
+
+function createSpike(x, y=G.SPIKE_STARTING_LEVEL, startOffset=0, speed=0.5, goingUp=false) {
+  spikes.push({
+    pos: vec(x, y),
+    speed: speed,
+    startLevel: G.SPIKE_STARTING_LEVEL + startOffset,
+    goingUp: goingUp
+  });
 }
