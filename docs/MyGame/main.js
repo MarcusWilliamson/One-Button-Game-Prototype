@@ -24,8 +24,8 @@ const G = {
   PLAYER_DEFAULT_SIZE: 12,
   PLAYER_HEIGHT: 3,
   SCREEN_SCROLL_SPEED: 0.1,
-  SCREEN_SCROLL_BOUND: 90,
-  SCREEN_EDGE_SCROLL_AMOUNT: 40,
+  SCREEN_SCROLL_BOUND: 80,
+  SCREEN_EDGE_SCROLL_AMOUNT: 50,
   GROUND_LEVEL: 90,
   CEILING_LEVEL: 20,
   SPIKE_STARTING_LEVEL: 60,
@@ -35,7 +35,7 @@ const G = {
 options = {
   viewSize: {x: G.WIDTH, y: G.HEIGHT},
   isPlayingBgm: true,
-  isReplayEnabled: true,
+  isReplayEnabled: false,
   seed: 16,
 };
 
@@ -64,8 +64,9 @@ let player;
   * @type  { Spike [] }
   */
 let spikes = [];
-
 let currentStreak = 0;
+let nextSpikePos = 40;
+let numSpikeTypes = 4;
 
 function update() {
   // Init
@@ -74,20 +75,14 @@ function update() {
       pos: vec(G.WIDTH * 0.2, G.HEIGHT * 0.9),
       size: G.PLAYER_DEFAULT_SIZE
     }
-
-    createSpike(40, undefined, -10);
-    createSpike(60, undefined, -10);
-    createSpike(50, undefined, -10);
-    createSpike(90, G.GROUND_LEVEL, -10);
-    createSpike(70, G.GROUND_LEVEL, -10);
-    createSpike(80, G.GROUND_LEVEL, -10);
-
-    createSpike(120, G.SPIKE_STARTING_LEVEL + 25);
-    createSpike(125, G.SPIKE_STARTING_LEVEL + 20);
-    createSpike(130, G.SPIKE_STARTING_LEVEL + 15);
-    createSpike(135, G.SPIKE_STARTING_LEVEL + 10);
-    createSpike(140, G.SPIKE_STARTING_LEVEL + 5);
-    createSpike(145);
+    console.log("restart");
+    nextSpikePos = 40;
+ 
+    // Generate spikes
+    for (let i = 0; i < 5; i++) {
+      let formationType = Math.floor(Math.random() * numSpikeTypes);
+      nextSpikePos = createFormation(nextSpikePos, formationType);
+    }
   }
   
   // Draw player and spikes
@@ -121,6 +116,12 @@ function update() {
     scrollScreen(G.SCREEN_EDGE_SCROLL_AMOUNT);
   }
 
+  // Remove spikes if left of screen
+  if(spikes.length != 0 && spikes[0].pos.x < 0) {
+    console.log("removed one");
+    spikes.shift();
+  }
+
   // Move spikes up and down
   spikes.forEach(spike => {
     if(!spike.goingUp) { // Going down
@@ -148,7 +149,7 @@ function scrollScreen(amount=G.SCREEN_SCROLL_SPEED) {
 function checkCollision() {
   const isCollidingWithSpike = box(player.pos, player.size, G.PLAYER_HEIGHT).isColliding.char.a;
   if(isCollidingWithSpike) {
-    end();
+    gameOver();
   }
 }
 
@@ -159,4 +160,49 @@ function createSpike(x, y=G.SPIKE_STARTING_LEVEL, startOffset=0, speed=0.5, goin
     startLevel: G.SPIKE_STARTING_LEVEL + startOffset,
     goingUp: goingUp
   });
+}
+
+function createFormation(posX, formationNumber) {
+  console.log("Creating formation " + formationNumber + " at x: " + posX);
+  switch(formationNumber) {
+    case 0:  // Alternating rows of 3
+      createSpike(posX, undefined, -10);
+      createSpike(posX + 10, undefined, -10);
+      createSpike(posX + 20, undefined, -10);
+      createSpike(posX + 30, G.GROUND_LEVEL, -10);
+      createSpike(posX + 40, G.GROUND_LEVEL, -10);
+      createSpike(posX + 50, G.GROUND_LEVEL, -10);
+      return posX + 70
+    case 1: // Alternating rows of 3, closer formation
+      createSpike(posX, undefined, -10);
+      createSpike(posX + 5, undefined, -10);
+      createSpike(posX + 10, undefined, -10);
+      createSpike(posX + 15, G.GROUND_LEVEL, -10);
+      createSpike(posX + 20, G.GROUND_LEVEL, -10);
+      createSpike(posX + 25, G.GROUND_LEVEL, -10);
+      return posX + 45;
+    case 2: // Chasing spikes
+      createSpike(posX, G.SPIKE_STARTING_LEVEL + 25);
+      createSpike(posX + 5, G.SPIKE_STARTING_LEVEL + 20);
+      createSpike(posX + 10, G.SPIKE_STARTING_LEVEL + 15);
+      createSpike(posX + 15, G.SPIKE_STARTING_LEVEL + 10);
+      createSpike(posX + 20, G.SPIKE_STARTING_LEVEL + 5);
+      createSpike(posX + 25);
+      return posX + 45;
+    case 3: // Chasing spikes, wider formation
+      createSpike(posX, G.SPIKE_STARTING_LEVEL + 25, undefined, 0.4);
+      createSpike(posX + 10, G.SPIKE_STARTING_LEVEL + 20, undefined, 0.4);
+      createSpike(posX + 20, G.SPIKE_STARTING_LEVEL + 15, undefined, 0.4);
+      createSpike(posX + 30, G.SPIKE_STARTING_LEVEL + 10, undefined, 0.4);
+      createSpike(posX + 40, G.SPIKE_STARTING_LEVEL + 5, undefined, 0.4);
+      createSpike(posX + 50, undefined, 0.4);
+      return posX + 70;
+    default:
+      break;
+  }
+}
+
+function gameOver() {
+  end()
+  spikes = []
 }
