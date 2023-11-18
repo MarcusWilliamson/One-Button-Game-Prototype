@@ -76,7 +76,7 @@ function update() {
       pos: vec(G.WIDTH * 0.2, G.HEIGHT * 0.9),
       size: G.PLAYER_DEFAULT_SIZE
     }
-    console.log("restart");
+    // console.log("restart");
     nextSpikePos = 40;
   }
 
@@ -87,7 +87,6 @@ function update() {
       createSpike(nextSpikePos);
       nextSpikePos += G.SPACE_BETWEEN_FORMATIONS;
     } else {  // Make spike formation
-      console.log(nextSpikePos);
       nextSpikePos = createFormation(nextSpikePos, formationType) + G.SPACE_BETWEEN_FORMATIONS;
     }
   }
@@ -126,7 +125,6 @@ function update() {
 
   // Remove spikes if left of screen
   if(spikes.length != 0 && spikes[0].pos.x < 0) {
-    console.log("removed one");
     spikes.shift();
   }
 
@@ -169,11 +167,11 @@ function createSpike(x, y=G.SPIKE_STARTING_LEVEL, startOffset=0, speed=G.SPIKE_D
     startLevel: G.SPIKE_STARTING_LEVEL + startOffset,
     goingUp: goingUp
   });
-  console.log(y + " " + (G.SPIKE_STARTING_LEVEL + startOffset));
+  // console.log(y + " " + (G.SPIKE_STARTING_LEVEL + startOffset));
 }
 
 function createFormation(posX, formationNumber) {
-  console.log("Creating formation " + formationNumber + " at x: " + posX);
+  // console.log("Creating formation " + formationNumber + " at x: " + posX);
   switch(formationNumber) {
     case 0:  // Alternating rows of 3
       createSpike(posX, G.SPIKE_STARTING_LEVEL - 10, -10);
