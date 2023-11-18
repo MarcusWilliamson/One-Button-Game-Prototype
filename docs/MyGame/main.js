@@ -29,7 +29,8 @@ const G = {
   GROUND_LEVEL: 90,
   CEILING_LEVEL: 20,
   SPIKE_STARTING_LEVEL: 60,
-  SPIKE_DEFAULT_SPEED: 0.5
+  SPIKE_DEFAULT_SPEED: 0.5,
+  SPACE_BETWEEN_FORMATIONS: 30
 }
 
 options = {
@@ -77,11 +78,17 @@ function update() {
     }
     console.log("restart");
     nextSpikePos = 40;
- 
-    // Generate spikes
-    for (let i = 0; i < 5; i++) {
-      let formationType = Math.floor(Math.random() * numSpikeTypes);
-      nextSpikePos = createFormation(nextSpikePos, formationType);
+  }
+
+  // Generate spikes
+  while (nextSpikePos < 200) {
+    let formationType = Math.floor(Math.random() * numSpikeTypes * 2);
+    if (formationType > numSpikeTypes - 1) {  // Make single spike
+      createSpike(nextSpikePos);
+      nextSpikePos += G.SPACE_BETWEEN_FORMATIONS;
+    } else {  // Make spike formation
+      console.log(nextSpikePos);
+      nextSpikePos = createFormation(nextSpikePos, formationType) + G.SPACE_BETWEEN_FORMATIONS;
     }
   }
   
@@ -100,12 +107,13 @@ function update() {
   if(input.isPressed) { // Extend front
     player.size += G.PLAYER_GROW_SPEED;
     player.pos.x += G.PLAYER_GROW_SPEED / 2;
-    currentStreak += player.size * (G.PLAYER_GROW_SPEED / 2) * 0.2; // Size * distance traveled * 0.2
+    addScore(G.PLAYER_GROW_SPEED / 2);
+    // currentStreak += player.size * (G.PLAYER_GROW_SPEED / 2) * 0.2; // Size * distance traveled * 0.2
   } else if (player.size > G.PLAYER_DEFAULT_SIZE) { // Retract rear
-    if (currentStreak > 0) {
+    /* if (currentStreak > 0) {
       addScore(currentStreak);
       currentStreak = 0;
-    }
+    } */
     player.size -= G.PLAYER_SHRINK_SPEED;
     player.size = clamp(player.size, G.PLAYER_DEFAULT_SIZE, 100);
     player.pos.x += G.PLAYER_GROW_SPEED / 2;
@@ -144,6 +152,7 @@ function update() {
 function scrollScreen(amount=G.SCREEN_SCROLL_SPEED) {
   player.pos.x -= amount;
   spikes.forEach(spike => spike.pos.x -= amount);
+  nextSpikePos -= amount;
 }
 
 function checkCollision() {
@@ -153,34 +162,35 @@ function checkCollision() {
   }
 }
 
-function createSpike(x, y=G.SPIKE_STARTING_LEVEL, startOffset=0, speed=0.5, goingUp=false) {
+function createSpike(x, y=G.SPIKE_STARTING_LEVEL, startOffset=0, speed=G.SPIKE_DEFAULT_SPEED, goingUp=false) {
   spikes.push({
     pos: vec(x, y),
     speed: speed,
     startLevel: G.SPIKE_STARTING_LEVEL + startOffset,
     goingUp: goingUp
   });
+  console.log(y + " " + (G.SPIKE_STARTING_LEVEL + startOffset));
 }
 
 function createFormation(posX, formationNumber) {
   console.log("Creating formation " + formationNumber + " at x: " + posX);
   switch(formationNumber) {
     case 0:  // Alternating rows of 3
-      createSpike(posX, undefined, -10);
-      createSpike(posX + 10, undefined, -10);
-      createSpike(posX + 20, undefined, -10);
+      createSpike(posX, G.SPIKE_STARTING_LEVEL - 10, -10);
+      createSpike(posX + 10, G.SPIKE_STARTING_LEVEL - 10, -10);
+      createSpike(posX + 20, G.SPIKE_STARTING_LEVEL - 10, -10);
       createSpike(posX + 30, G.GROUND_LEVEL, -10);
       createSpike(posX + 40, G.GROUND_LEVEL, -10);
       createSpike(posX + 50, G.GROUND_LEVEL, -10);
-      return posX + 70
+      return posX + 50
     case 1: // Alternating rows of 3, closer formation
-      createSpike(posX, undefined, -10);
-      createSpike(posX + 5, undefined, -10);
-      createSpike(posX + 10, undefined, -10);
+      createSpike(posX, G.SPIKE_STARTING_LEVEL - 10, -10);
+      createSpike(posX + 5, G.SPIKE_STARTING_LEVEL - 10, -10);
+      createSpike(posX + 10, G.SPIKE_STARTING_LEVEL - 10, -10);
       createSpike(posX + 15, G.GROUND_LEVEL, -10);
       createSpike(posX + 20, G.GROUND_LEVEL, -10);
       createSpike(posX + 25, G.GROUND_LEVEL, -10);
-      return posX + 45;
+      return posX + 25;
     case 2: // Chasing spikes
       createSpike(posX, G.SPIKE_STARTING_LEVEL + 25);
       createSpike(posX + 5, G.SPIKE_STARTING_LEVEL + 20);
@@ -188,16 +198,17 @@ function createFormation(posX, formationNumber) {
       createSpike(posX + 15, G.SPIKE_STARTING_LEVEL + 10);
       createSpike(posX + 20, G.SPIKE_STARTING_LEVEL + 5);
       createSpike(posX + 25);
-      return posX + 45;
+      return posX + 25;
     case 3: // Chasing spikes, wider formation
-      createSpike(posX, G.SPIKE_STARTING_LEVEL + 25, undefined, 0.4);
-      createSpike(posX + 10, G.SPIKE_STARTING_LEVEL + 20, undefined, 0.4);
-      createSpike(posX + 20, G.SPIKE_STARTING_LEVEL + 15, undefined, 0.4);
-      createSpike(posX + 30, G.SPIKE_STARTING_LEVEL + 10, undefined, 0.4);
-      createSpike(posX + 40, G.SPIKE_STARTING_LEVEL + 5, undefined, 0.4);
-      createSpike(posX + 50, undefined, 0.4);
-      return posX + 70;
+      createSpike(posX, G.SPIKE_STARTING_LEVEL + 10, -15,);
+      createSpike(posX + 10, G.SPIKE_STARTING_LEVEL + 5, -15);
+      createSpike(posX + 20, G.SPIKE_STARTING_LEVEL, -15);
+      createSpike(posX + 30, G.SPIKE_STARTING_LEVEL - 5, -15);
+      createSpike(posX + 40, G.SPIKE_STARTING_LEVEL - 10, -15);
+      createSpike(posX + 50, G.SPIKE_STARTING_LEVEL - 15, -15);
+      return posX + 50;
     default:
+      console.log("This shouldn't happen");
       break;
   }
 }
